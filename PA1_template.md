@@ -9,11 +9,10 @@ output:
 
 ## Loading and preprocessing the data
 First we load the required data to perform the analysis:
-```{r echo=TRUE}
 
+```r
 rawStepDataSet <- read.csv("activity.csv")
 filteredStepDataSet <- rawStepDataSet[!is.na(rawStepDataSet$steps),]
-
 ```
 
 
@@ -21,8 +20,8 @@ filteredStepDataSet <- rawStepDataSet[!is.na(rawStepDataSet$steps),]
 
 In this section we proceed to calculate the total steps taken per day considering only the processed data after discarding the NA samples.
 
-```{r echo=TRUE}
 
+```r
 # Obtain the distinct days of the filtered data set
 targetDays <- unique(filteredStepDataSet$date)
 resultData <- data.frame("Day"=character(),"TotalSteps"=numeric(),stringsAsFactors = FALSE)
@@ -37,23 +36,30 @@ for (targetDay in targetDays) {
   resultData <- rbind(resultData,newRow) 
 }
 ```
-```{r total_steps_1, echo=TRUE,fig.cap="Figure 1 - Total Steps per Day considering non-NA data",fig.align="center"}
+
+```r
 barplot(resultData$currentStepsTotal,main = "Total Steps per Day",xlab = "Date",names.arg = unique(resultData$targetDay),ylab = "Total Steps measured")
 ```
 
-```{r echo=TRUE}
+<div class="figure" style="text-align: center">
+<img src="PA1_template_files/figure-html/total_steps_1-1.png" alt="Figure 1 - Total Steps per Day considering non-NA data"  />
+<p class="caption">Figure 1 - Total Steps per Day considering non-NA data</p>
+</div>
+
+
+```r
 totalStepsMean <- mean(resultData$currentStepsTotal)
 totalStepsMedian <- median(resultData$currentStepsTotal)
 ```
-Based on this data we observe a mean of `r totalStepsMean` steps in total per day. Also with a reported median of `r totalStepsMedian`. 
+Based on this data we observe a mean of 1.0766189\times 10^{4} steps in total per day. Also with a reported median of 10765. 
 
 ## What is the average daily activity pattern?
 
 Now, focusing on the patterns per daily interval, we can observe the following behavior as illustrated in the following plot:
 
 
-```{r echo=TRUE}
 
+```r
 # Obtain the distinct days of the filtered data set
 targetIntervals <- unique(filteredStepDataSet$interval)
 resultData4 <- data.frame("Interval"=numeric(),"Average.Steps"=numeric(),stringsAsFactors = FALSE)
@@ -67,43 +73,50 @@ for (targetInterval in targetIntervals) {
   resultData4 <- rbind(resultData4,newRow) 
 }
 colnames(resultData4) <- c("Interval","Average.Steps")
-
 ```
-```{r echo=TRUE,fig.cap="Figure 2 - Average Steps per Daily Interval",fig.align="center"}
+
+```r
 plot.ts(resultData4$Average.Steps,main="Average Steps per Daily Interval",ylab="Average Steps",xlab="Interval",axes = F)
 axis(2)
 axis(1,at=resultData4$Interval,labels = resultData4$Interval)
-
 ```
 
-```{r echo=TRUE}
+<div class="figure" style="text-align: center">
+<img src="PA1_template_files/figure-html/unnamed-chunk-5-1.png" alt="Figure 2 - Average Steps per Daily Interval"  />
+<p class="caption">Figure 2 - Average Steps per Daily Interval</p>
+</div>
+
+
+```r
 finalResultIntervfal = resultData4[max(resultData4$Average.Steps) == resultData4$Average.Steps,]
 ```
 
-From analysis illustrated above it can be observed that the most active daily interval is `r finalResultIntervfal[1,1]` with `r finalResultIntervfal[1,2]` steps in average.
+From analysis illustrated above it can be observed that the most active daily interval is 835 with 206.1698113 steps in average.
 
 ## Imputing missing values
 
 It is understood that there is missing data on the input file. So lets quantify it given the following code:
-```{r echo=TRUE}
+
+```r
 missingSamples <- sum(is.na(rawStepDataSet$steps))
 ```
 
-As a result we obtain that there are `r missingSamples` missing steps samples.
+As a result we obtain that there are 2304 missing steps samples.
 
 One strategy to replace the missing data across the data set. Particularly on the 'steps' column would be to replace the 'NA' values with zeros, since no safe assumptions can be made in order to interpolate across the time intervals.
 
 Given that strategy, the code to implement such data filling is disclosed as it follows:
-```{r echo=TRUE}
+
+```r
 filledStepDataSet <- read.csv("activity.csv")
 
 #Fill the steps column with 0s on missng values
 filledStepDataSet[is.na(filledStepDataSet)]<-0
-
 ```
 Now considering the new data set we recalculate the same histogram as illustrted on Fig. 1:
 
-```{r echo=TRUE,fig.cap="Figure 3 - Total Steps per Day considering Filled Data",fig.align="center"}
+
+```r
 # Obtain the distinct days of the filtered data set
 targetDays <- unique(filledStepDataSet$date)
 resultData5 <- data.frame("Day"=character(),"TotalSteps"=numeric(),stringsAsFactors = FALSE)
@@ -119,22 +132,28 @@ for (targetDay in targetDays) {
 }
 
 barplot(resultData5$currentStepsTotal,main = "Total Steps per Day",xlab = "Date",names.arg = unique(resultData5$targetDay),ylab = "Total Steps Measured")
-
 ```
 
+<div class="figure" style="text-align: center">
+<img src="PA1_template_files/figure-html/unnamed-chunk-9-1.png" alt="Figure 3 - Total Steps per Day considering Filled Data"  />
+<p class="caption">Figure 3 - Total Steps per Day considering Filled Data</p>
+</div>
+
 Also based on this new data set. We recalculate our derivated metrics:
-```{r echo=TRUE}
+
+```r
 totalStepsMeanFilled <- mean(resultData5$currentStepsTotal)
 totalStepsMedianFilled <- median(resultData5$currentStepsTotal)
 ```
 
-So for this time, it is observed a mean of `r totalStepsMeanFilled` total steps per day with a median of `r totalStepsMedianFilled`. Which indeed it represented an alteration based on our missing data recovery strategy.
+So for this time, it is observed a mean of 9354.2295082 total steps per day with a median of 1.0395\times 10^{4}. Which indeed it represented an alteration based on our missing data recovery strategy.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
 On this section and considering our new data set created on the previous section. We proceed to analyze the patterns between weekdays (E.g. Monday, Tuesday, etc) versus weekends.
 
-```{r echo=TRUE}
+
+```r
 # Load the required library
 library(chron)
 targetIntervals <- unique(filledStepDataSet$interval)
@@ -162,14 +181,18 @@ for (targetInterval in targetIntervals) {
 
 colnames(resultDataWeekdays) <- c("Interval","Average.Steps")
 colnames(resultDataWeekends) <- c("Interval","Average.Steps")
-
 ```
 Such patterns are illustrated and contrasted as it follows:
-```{r echo=TRUE,fig.cap="Figure 4 - Average Steps on Weekdays vs Weekends",fig.align="center"}
+
+```r
 # Construct the plot
 par(bg="white",mfrow=c(1,2))
 barplot(resultDataWeekdays$Average.Steps,main = "Average Steps per Interval \n Weekdays",xlab = "Interval",names.arg = unique(resultDataWeekdays$Interval),ylab = "Average Steps Measured")
 barplot(resultDataWeekends$Average.Steps,main = "Average Steps per Interval \n Weekends",xlab = "Interval",names.arg = unique(resultDataWeekends$Interval),ylab = "Average Steps Measured")
-
 ```
+
+<div class="figure" style="text-align: center">
+<img src="PA1_template_files/figure-html/unnamed-chunk-12-1.png" alt="Figure 4 - Average Steps on Weekdays vs Weekends"  />
+<p class="caption">Figure 4 - Average Steps on Weekdays vs Weekends</p>
+</div>
 
